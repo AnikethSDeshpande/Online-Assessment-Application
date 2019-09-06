@@ -19,7 +19,7 @@ mongo = PyMongo(app)
 # SIGNUP-API
 class SignUp(Resource):
 
-    # checkAvailability is a function that checks if the username
+    # checkAvailability is a function that checks if the email_id
     # can be used to create a new account
     def checkAvailability(self, obj):
         mongo_obj = list(mongo.db.login.find({'email_id': obj['email_id']}))
@@ -45,11 +45,11 @@ class SignUp(Resource):
 
     
 # LOGIN-API
-class SignUp(Resource):
+class Login(Resource):
 
-    # checkAvailability is a function that checks if the username
-    # can be used to create a new account
-    def checkAvailability(self, obj):
+    # authenticate is a function that authenticates the username and password
+
+    def authenticate(self, obj):
         mongo_obj = list(mongo.db.login.find({'email_id': obj['email_id']}))
         if len(mongo_obj)>0:
             return False
@@ -60,7 +60,7 @@ class SignUp(Resource):
     def post(self):
         obj = request.get_json(force=True)
 
-        if self.checkAvailability(obj) == True:
+        if self.authenticate(obj) == True:
            mongo.db.login.insert({
                'username': obj['username'],
                'email_id': obj['email_id'],
@@ -112,4 +112,4 @@ api.add_resource(SignUp, '/sign_up')
 api.add_resource(T_entries, '/t_entries')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='10.18.10.203')
+    app.run(debug=True, host='192.168.43.27')
