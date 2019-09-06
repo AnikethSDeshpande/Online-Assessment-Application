@@ -7,7 +7,8 @@ from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from flask_pymongo import PyMongo
 from flask_cors import CORS
-
+from random import randint
+from hashlib import sha256
 
 app = Flask(__name__)
 CORS(app)
@@ -38,35 +39,45 @@ class SignUp(Resource):
                'email_id': obj['email_id'],
                'password': obj['password']
            })
-           return {'msg': 'Welcome {}!'.format(obj['username'])}
+           return {'status': 'success'}
         
         else:
-            return {'error': 'email_id: {} already used'.format(obj['email_id'])}
+            return {
+                'error': 'email_id: {} already used'.format(obj['email_id']),
+                'status': 'failed'
+                }
 
     
 # LOGIN-API
 class Login(Resource):
 
     # authenticate is a function that authenticates the username and password
-
     def authenticate(self, obj):
-        mongo_obj = list(mongo.db.login.find({'email_id': obj['email_id']}))
-        if len(mongo_obj)>0:
-            return False
+        mongo_obj = list(mongo.db.login.find({
+            'email_id': obj['email_id'],
+            'password': obj['password']
+            }))
+        if len(mongo_obj)==1:
+            return True, mongo_obj[0]['username']
         else:
-            return True
+            return False
 
-    # POST: adding new user to the database if checkAvailability returns TRUE
+    # genToken: generates a token that will be used throughout the login seesion
+    def genToken(self, username):
+        KEY = str(randint(100, 1000)) + username + str(randint(100, 1000))
+        token = sha256(KEY.encode())
+        return token.hexdigest()
+
+    # POST: checking if the user credentials are authentic
     def post(self):
         obj = request.get_json(force=True)
-
-        if self.authenticate(obj) == True:
-           mongo.db.login.insert({
-               'username': obj['username'],
-               'email_id': obj['email_id'],
-               'password': obj['password']
-           })
-           return {'msg': 'Welcome {}!'.format(obj['username'])}
+        auth, username = self.authenticate(obj)
+        if  auth == True:
+           return {
+               'status': 'success',
+               'token' : self.genToken(username),
+               'username': username
+           }
         
         else:
             return {'error': 'email_id: {} already used'.format(obj['email_id'])}
@@ -109,7 +120,7 @@ class getQ(Resource):
 '''        
 # resources routing
 api.add_resource(SignUp, '/sign_up')
-api.add_resource(T_entries, '/t_entries')
+api.add_resource(Login, '/login')
 
 if __name__ == '__main__':
     app.run(debug=True, host='192.168.43.27')
