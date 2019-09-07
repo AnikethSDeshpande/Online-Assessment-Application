@@ -108,10 +108,10 @@ class NewItem(Resource):
 
 
 class UploadQuestions(Resource):
-    def getQuestions(self):
-        obj = request.get_json()
-        print(obj['questions'])
-        return obj['questions']    
+    def post(self):
+        obj = request.get_json(force=True)
+        
+        return obj['questions'][0]['question']    
 
 
 
@@ -147,6 +147,7 @@ class T_entries(Resource):
 api.add_resource(SignUp, '/sign_up')
 api.add_resource(Login, '/login')
 api.add_resource(NewItem, '/new_item')
+api.add_resource(UploadQuestions, '/upload_questions')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='10.10.5.25')
+    app.run(debug=True, host='10.10.6.163')
