@@ -8,7 +8,7 @@ from flask_restful import Resource, Api
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 from random import randint
-from hashlib import sha256
+from hashlib import sha1
 
 app = Flask(__name__)
 CORS(app)
@@ -39,12 +39,14 @@ class SignUp(Resource):
                'email_id': obj['email_id'],
                'password': obj['password']
            })
-           return {'status': 'success'}
+           return {
+               'status': 'success'
+               }
         
         else:
             return {
-                'error': 'email_id: {} already used'.format(obj['email_id']),
-                'status': 'failed'
+                'status': 'failed',
+                'error': 'email_id: {} already used'.format(obj['email_id'])
                 }
 
     
@@ -60,12 +62,12 @@ class Login(Resource):
         if len(mongo_obj)==1:
             return True, mongo_obj[0]['username']
         else:
-            return False
+            return False, ''
 
     # genToken: generates a token that will be used throughout the login seesion
     def genToken(self, username):
         KEY = str(randint(100, 1000)) + username + str(randint(100, 1000))
-        token = sha256(KEY.encode())
+        token = sha1(KEY.encode())
         return token.hexdigest()
 
     # POST: checking if the user credentials are authentic
@@ -80,11 +82,39 @@ class Login(Resource):
            }
         
         else:
-            return {'error': 'email_id: {} already used'.format(obj['email_id'])}
+            return {
+                'error': 'check login credentials',
+                'status': 'failed'
+                }
+
+
+# New-Item-API
+class NewItem(Resource):
+    def create_new_item(self, obj):
+        pass
+
+    def post(self):
+        obj = request.get_json(force=True)
+        
+        username = obj['username']    # name of the user creating the quiz
+        item_type = obj['item_type']  # IA test/ACM/Technosparks/others
+        subject = obj['subject']      # CO/OOPS/MPMC
+        ia = obj['ia']                # 1/2/3 **optional
+        semester = obj['semester']    # 3/5/7
+
+        item_name = str(username) + '_' + str(item_type) + '_' + str(subject) + '_' + str(ia) + '_' + str(semester)
+
+        return {'item_name': item_name}
+
+
+class UploadQuestions(Resource):
+    def getQuestions(self):
+        obj = request.get_json()
+        print(obj['questions'])
+        return obj['questions']    
 
 
 
-    
 
 # Tables-API
 
@@ -112,15 +142,11 @@ class T_entries(Resource):
         mongo.db.q.delete({'name': name})
         return {'object_deleted': str(obj)}
 
-'''
-class getQ(Resource):
-    # we intend to get the groups that end up in Queue
-    def get(self):
-        result = bestFit(tables, table_size, group, group_size)
-'''        
+
 # resources routing
 api.add_resource(SignUp, '/sign_up')
 api.add_resource(Login, '/login')
+api.add_resource(NewItem, '/new_item')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='192.168.43.27')
+    app.run(debug=True, host='10.10.5.25')
