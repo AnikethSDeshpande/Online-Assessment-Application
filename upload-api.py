@@ -41,10 +41,11 @@ class UploadQuestions(Resource):
         obj = request.get_json(force=True)
 
         result = mongo.db.items.insert(obj)
-        print(result)
-        return str(result)
-
-
+        
+        return {
+            "status": "success",
+            "id": str(result)
+            }
 
 
 # resources routing
