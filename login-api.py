@@ -88,10 +88,6 @@ class Login(Resource):
                 }
 
 
-
-
-
-
 # Tables-API
 
 class T_entries(Resource):

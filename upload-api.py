@@ -1,5 +1,5 @@
 # Author: Aniketh S Deshpande
-# API-name: Login
+# API-name: Uplaod-Items
 # Flask-Server
 # Database: MongoDB
 
@@ -19,8 +19,6 @@ mongo = PyMongo(app)
 
 # New-Item-API
 class NewItem(Resource):
-    def create_new_item(self, obj):
-        pass
 
     def post(self):
         obj = request.get_json(force=True)
@@ -33,13 +31,16 @@ class NewItem(Resource):
 
         item_name = str(username) + '_' + str(item_type) + '_' + str(subject) + '_' + str(ia) + '_' + str(semester)
 
-        return {'item_name': item_name}
+        return {
+            'item_name': item_name
+            }
 
 
 class UploadQuestions(Resource):
     def post(self):
         obj = request.get_json(force=True)
-
+        obj['registrations'] = []
+        obj['responses'] = []
         result = mongo.db.items.insert(obj)
         
         return {
@@ -49,7 +50,7 @@ class UploadQuestions(Resource):
 
 
 # resources routing
-api.add_resource(NewItem, '/new_item')
+api.add_resource(NewItem, '/new_item_name')
 api.add_resource(UploadQuestions, '/upload_questions')
 
 if __name__ == '__main__':
