@@ -9,6 +9,9 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 from random import randint
 from hashlib import sha1
+from config import get_ip
+
+ip_address = get_ip()
 
 app = Flask(__name__)
 CORS(app)
@@ -74,6 +77,8 @@ class Login(Resource):
     def post(self):
         obj = request.get_json(force=True)
         auth, username = self.authenticate(obj)
+
+
         if  auth == True:
            return {
                'status': 'success',
@@ -87,7 +92,7 @@ class Login(Resource):
                 'status': 'failed'
                 }
 
-
+''''
 # Tables-API
 
 class T_entries(Resource):
@@ -113,7 +118,7 @@ class T_entries(Resource):
         name = obj['name']
         mongo.db.q.delete({'name': name})
         return {'object_deleted': str(obj)}
-
+'''
 
 # resources routing
 api.add_resource(SignUp, '/sign_up')
@@ -121,4 +126,4 @@ api.add_resource(Login, '/login')
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='10.10.5.240', port=5050)
+    app.run(debug=True, host=ip_address, port=5050)
