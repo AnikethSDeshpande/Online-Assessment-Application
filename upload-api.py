@@ -57,8 +57,6 @@ class UploadQuestions(Resource):
         password = obj['item_password']
 
         if self.checkAvailability(password) == True:
-            obj['registrations'] = []
-            obj['responses'] = []
             result = mongo.db.items.insert(obj)
             
             if result:
