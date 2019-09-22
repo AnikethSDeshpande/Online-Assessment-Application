@@ -97,7 +97,7 @@ class StudentLogin(Resource):
         if len(mongo_obj)==1:
             return True, obj['email_id'], mongo_obj[0]['username'], mongo_obj[0]['details']
         else:
-            return False, ''
+            return False, '', '', ''
 
     # genToken: generates a token that will be used throughout the login seesion
     def genToken(self, username):

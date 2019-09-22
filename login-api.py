@@ -56,6 +56,9 @@ class SignUp(Resource):
 # LOGIN-API
 class Login(Resource):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     # authenticate is a function that authenticates the username and password
     def authenticate(self, obj):
         mongo_obj = list(mongo.db.login.find({
@@ -80,11 +83,12 @@ class Login(Resource):
 
 
         if  auth == True:
-           return {
-               'status': 'success',
-               'token' : self.genToken(username),
-               'username': username
-           }
+            return {
+                'status': 'success',
+                'token' : self.genToken(username),
+                'username': username,
+                'email_id': obj['email_id'],
+            }
         
         else:
             return {
