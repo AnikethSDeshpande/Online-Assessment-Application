@@ -1,0 +1,6 @@
+gnome-terminal --tab --title="1" --command="python3 login-api.py"
+gnome-terminal --tab --title="2" --command="python3 upload_quiz_api.py"
+gnome-terminal --tab --title="3" --command="python3 student-login-api.py"
+gnome-terminal --tab --title="4" --command="python3 show_quiz.py"
+gnome-terminal --tab --title="5" --command="python3 faculty_dashboard.py"
+gnome-terminal --tab --title="6" --command="python3 student_dashboard.py"
