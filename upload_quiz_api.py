@@ -63,7 +63,7 @@ class UploadQuestions(Resource):
                 return {
                     "status": "success",
                     "id": str(sha1(str(result).encode()))
-                    }
+                }
             else:
                 return {
                     "status": "failed",

@@ -38,7 +38,8 @@ class StudentSignUp(Resource):
            mongo.db.student_details.insert({
                'username': obj['username'],
                'email_id': obj['email_id'],
-               'password': obj['password']
+               'password': obj['password'],
+               'details': ''
            })
            return {
                'status': 'success',
@@ -94,10 +95,12 @@ class StudentLogin(Resource):
             'email_id': obj['email_id'],
             'password': obj['password']
             }))
+
         if len(mongo_obj)==1:
             return True, obj['email_id'], mongo_obj[0]['username'], mongo_obj[0]['details']
         else:
             return False, '', '', ''
+
 
     # genToken: generates a token that will be used throughout the login seesion
     def genToken(self, username):

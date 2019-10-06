@@ -7,9 +7,10 @@ from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from flask_pymongo import PyMongo
 from flask_cors import CORS
-from random import randint
+from random import randint, shuffle
 from hashlib import sha1
 from config import get_ip
+
 
 ip_address = get_ip()
 
@@ -27,6 +28,9 @@ class SudentPassKeyAuth(Resource):
                 'item_password': item_password
             }))
         
+        def shuffle_options(options):
+            shuffle(options)
+            return options
 
         questions = []
         if question_paper[0]['gate'] == '__open__':
@@ -36,9 +40,12 @@ class SudentPassKeyAuth(Resource):
                         { 
                             'qno': question['qno'], 
                             'question': question['question'], 
-                            'options': question['options']
+                            'options': shuffle_options(question['options'])
                         } for question in question_paper[0]['questions']
                     ]
+                
+                # shuffling the questions
+                shuffle(questions)
                 
                 return {
                     'status': 'success',
@@ -75,7 +82,17 @@ class SudentPassKeyAuth(Resource):
                 'error' : 'test_repeat_error' 
             }
         else:
-            return self.format_questions(item_password)
+
+            result = mongo.db.responses.insert({
+                "email_id": email_id,
+                "item_password": item_password,
+                "student_response": "NA_NA",
+                "score": "0_0"
+            }
+            )
+
+            if result:
+                return self.format_questions(item_password)
 
 
 # StudentResponseHandler
@@ -117,12 +134,17 @@ class StudentResponseHandler(Resource):
 
         score, processed_student_response = self.get_score(item_password, student_response)
         
-        result = mongo.db.responses.insert({
-            "email_id": email_id,
-            "item_password": item_password,
-            "student_response": processed_student_response,
-            "score": score
-        })
+        result = mongo.db.responses.update({
+                "email_id": email_id,
+                "item_password": item_password
+            },
+            {
+                "$set": {
+                    "student_response": processed_student_response,
+                    "score": score
+                }
+            }
+            )
 
         if result:
             return {
