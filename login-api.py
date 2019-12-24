@@ -125,9 +125,10 @@ class T_entries(Resource):
 '''
 
 # resources routing
-api.add_resource(SignUp, '/sign_up')
+api.add_resource(SignUp, '/sign_up')  
 api.add_resource(Login, '/login')
 
 
+# ipaddress loaded dynamically
 if __name__ == '__main__':
     app.run(debug=True, host=ip_address, port=5050)
