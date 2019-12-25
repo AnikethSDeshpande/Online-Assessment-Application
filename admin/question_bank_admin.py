@@ -26,14 +26,53 @@ class QuestionBankList(Resource):
         mongo_obj = list(mongo.db.qbanks.find({}) )
         qb_names = []
         for qb_name in mongo_obj:
-            qb_names.append(qb_name['name'])
+            qb_names.append({
+                "name": qb_name['name'],
+                "description": qb_name['description']
+            })
 
         return {"qb_names": qb_names}
 
+class NewQuestionBank(Resource):
 
+    def post(self):
+        obj = request.get_json(force=True)
+
+        name = obj['qb_name']
+        description = obj['description']
+
+        qb_list = QuestionBankList()
+
+        qbs = qb_list.get()
+
+        print(name, qbs)
+        if name in qbs['qb_names']:
+            return {
+                'status': 'failed',
+                'error': 'qb_name_repeat_error'
+            }
+
+        mongo_obj = mongo.db.qbanks.insert({
+            "name": name,
+            "description": str(description)
+        })
+        
+        new_list = qb_list.get()
+
+        if mongo_obj:
+            return {
+                'status': 'success',
+                'new_list': new_list['qb_names']
+            }
+
+        return {
+            'status': 'failed',
+            'error': 'one or more fields empty'
+        }
 
 # resources routing
 api.add_resource(QuestionBankList, '/question_bank_list')  
+api.add_resource(NewQuestionBank, '/new_qb')  
 
 
 
