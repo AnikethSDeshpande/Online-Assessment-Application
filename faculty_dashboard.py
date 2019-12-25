@@ -60,10 +60,9 @@ class ResponsesDashboard(Resource):
     def post(self):
         obj = request.get_json(force=True)
     
-
         # code to get the question paper of the corresponding item_password
         ext_obj = SudentPassKeyAuth()
-        question_paper = ext_obj.format_questions(obj['item_password'])
+        question_paper = ext_obj.format_questions(obj['item_password'], '_escape_')
 
 
         # code to get the responses wrt to the given item_password
@@ -94,7 +93,7 @@ class ResponsesDashboard(Resource):
 
             {
                 '$sort': {
-                    'lookup.details.usn': 1
+                    'score': -1
                 }
             }
 
@@ -109,7 +108,8 @@ class ResponsesDashboard(Resource):
                 'username': response['lookup'][0]['username'],
                 'score': response['score'],
                 'usn': response['lookup'][0]['details']['usn'],
-                'student_response': response['student_response']
+                'student_response': response['student_response'],
+                'email_id': response['email_id']
             })
 
         if len(responses)>0:
@@ -135,7 +135,8 @@ class ResponsesDashboard(Resource):
                 'average': stats[0]['average_score'],
                 'responses_count': len(response_list),
                 'response_list': response_list,
-                'question_paper': question_paper
+                'question_paper': question_paper,
+                'item_password': obj['item_password']
             }
         
         else:
@@ -176,10 +177,32 @@ class ChangeItemStatus(Resource):
             }
 
 
+class DeleteResponse(Resource):
+    def post(self):
+        obj = request.get_json(force=True)
+        item_password = obj['item_password']
+        email_ids = obj['email_ids']
+
+        for email_id in email_ids:
+            result = mongo.db.responses.remove(
+                {
+                    'item_password': item_password,
+                    'email_id': email_id
+                }
+            )
+        
+        if result:
+            return {
+                'status': 'success',
+                'item_password': item_password,
+            }
+
+
 # resources routing
 api.add_resource(FacultyDashboard, '/faculty_dashboard')
 api.add_resource(ResponsesDashboard, '/get_response_list')
 api.add_resource(ChangeItemStatus, '/change_item_gate')
+api.add_resource(DeleteResponse, '/delete_response_')
 
 if __name__ == '__main__':
     app.run(debug=True, host=ip_address, port=5054)

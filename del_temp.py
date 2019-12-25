@@ -31,7 +31,6 @@ class Delete(Resource):
         return {
             'status': 'GM!'
         }
-
             
 
 # resources routing

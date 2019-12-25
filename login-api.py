@@ -40,7 +40,8 @@ class SignUp(Resource):
            mongo.db.login.insert({
                'username': obj['username'],
                'email_id': obj['email_id'],
-               'password': obj['password']
+               'password': obj['password'],
+               'type': obj['type']
            })
            return {
                'status': 'success'
@@ -66,7 +67,7 @@ class Login(Resource):
             'password': obj['password']
             }))
         if len(mongo_obj)==1:
-            return True, mongo_obj[0]['username']
+            return True, mongo_obj[0]['username'], mongo_obj[0]['type']
         else:
             return False, ''
 
@@ -79,15 +80,23 @@ class Login(Resource):
     # POST: checking if the user credentials are authentic
     def post(self):
         obj = request.get_json(force=True)
-        auth, username = self.authenticate(obj)
-
+        auth, username, user_type = self.authenticate(obj)
 
         if  auth == True:
+            print('what i sent' + str({
+                'status': 'success',
+                'token' : self.genToken(username),
+                'username': username,
+                'email_id': obj['email_id'],
+                'type': user_type
+            }) )
+
             return {
                 'status': 'success',
                 'token' : self.genToken(username),
                 'username': username,
                 'email_id': obj['email_id'],
+                'type': user_type
             }
         
         else:

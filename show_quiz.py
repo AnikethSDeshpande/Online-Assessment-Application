@@ -23,19 +23,21 @@ mongo = PyMongo(app)
 
 # StudentPassKeyAuth
 class SudentPassKeyAuth(Resource):
-    def format_questions(self, item_password):
+    def format_questions(self, item_password, email_id):
         question_paper = list(mongo.db.items.find({
                 'item_password': item_password
             }))
         
+
         def shuffle_options(options):
             shuffle(options)
             return options
 
         questions = []
-        if question_paper[0]['gate'] == '__open__':
-            if len(question_paper) == 1:
+        if len(question_paper) == 1:
+            if (question_paper[0]['gate'] == '__open__' or email_id == '_escape_'):
                 time_limit = question_paper[0]['time_limit']
+                
                 questions = [
                         { 
                             'qno': question['qno'], 
@@ -43,26 +45,45 @@ class SudentPassKeyAuth(Resource):
                             'options': shuffle_options(question['options'])
                         } for question in question_paper[0]['questions']
                     ]
+                positive_marks = question_paper[0]['positive_marks']
+                negative_marks = question_paper[0]['negative_marks']
                 
-                # shuffling the questions
-                shuffle(questions)
+                # shuffling the questions if the request is not from faculty
+                if not email_id == '_escape_':
+                    shuffle(questions)
                 
+                # NA_NA and 0_0 is the condition when the student is displayed
+                # the question paper but he hasn't submitted his answers successfully.
+                # When there is successful submission, the keys- student_response and
+                # score get updated to proper values.
+
+                if not email_id == '_escape_':
+                    result = mongo.db.responses.insert({
+                        "email_id": email_id,
+                        "item_password": item_password,
+                        "student_response": "NA_NA",
+                        "score": "0_0"
+                    }
+                    )
+
                 return {
                     'status': 'success',
                     'questions': questions,
-                    'time_limit': time_limit
+                    'time_limit': time_limit,
+                    'positive_marks': positive_marks,
+                    'negative_marks': negative_marks
                 }
             
             else:
                 return {
                     'status': 'failed',
-                    'error' : 'item_password_error'
+                    'error' : 'gate_close_error'
                 }
         
         else:
             return {
                     'status': 'failed',
-                    'error' : 'gate_close_error'
+                    'error' : 'item_password_error'
                 }
 
 
@@ -75,24 +96,14 @@ class SudentPassKeyAuth(Resource):
             "email_id": email_id,
             "item_password": item_password
         }))
-
+        
         if len(responses)>0:
             return {
                 'status': 'failed',
                 'error' : 'test_repeat_error' 
             }
         else:
-
-            result = mongo.db.responses.insert({
-                "email_id": email_id,
-                "item_password": item_password,
-                "student_response": "NA_NA",
-                "score": "0_0"
-            }
-            )
-
-            if result:
-                return self.format_questions(item_password)
+            return self.format_questions(item_password, email_id)
 
 
 # StudentResponseHandler
@@ -115,13 +126,20 @@ class StudentResponseHandler(Resource):
                 } for stu in student_response
             ]
 
+        positive_marks = question_paper[0]['positive_marks']
+        negative_marks = question_paper[0]['negative_marks']
+
         score = 0
         for i, (aa,sa) in enumerate(zip(actual_answers, student_answers)):
             if aa['answer'] == sa['student_answer']:
                 student_response[i]['status'] = "correct"
-                score += 1
+                score += positive_marks
+            elif sa['student_answer'] == 'NA':
+                student_response[i]['status'] = "NA"
             else:
                 student_response[i]['status'] = "wrong"
+                score += negative_marks
+
             student_response[i]['actual_answer'] = aa['answer']
         
         return score, student_response
@@ -134,6 +152,8 @@ class StudentResponseHandler(Resource):
 
         score, processed_student_response = self.get_score(item_password, student_response)
         
+        # updating the keys- student_response and score
+
         result = mongo.db.responses.update({
                 "email_id": email_id,
                 "item_password": item_password

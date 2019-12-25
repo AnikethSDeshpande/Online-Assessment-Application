@@ -47,7 +47,7 @@ class ShowItemDetails(Resource):
             errors.append('RESPONSES_GIVEN_ERR')
 
 
-        if result:    
+        if result:
             return {
                 'status': 'success',
                 'questions': result[0]['questions'],
@@ -55,6 +55,8 @@ class ShowItemDetails(Resource):
                 'ia': result[0]['ia'],
                 'semester': result[0]['semester'],
                 'time_limit': result[0]['time_limit'],
+                'positive_marks': result[0]['positive_marks'],
+                'negative_marks': result[0]['negative_marks'],
                 'editable': {
                     'status': True,
                 } if len(errors) == 0 else {
@@ -75,8 +77,10 @@ class EditQuiz(Resource):
         obj = request.get_json(force=True)
 
         item_password = obj['item_password']
-        questions = obj['questions'],
+        questions = obj['questions']
         time_limit = obj['time_limit']
+        positive_marks = obj['positive_marks']
+        negative_marks = obj['negative_marks']
 
         result = dict(
             mongo.db.items.update(
@@ -86,8 +90,10 @@ class EditQuiz(Resource):
 
                 {
                     '$set': {
-                        'questions': questions[0],
-                        'time_limit': time_limit
+                        'questions': questions,
+                        'time_limit': time_limit,
+                        'positive_marks': positive_marks,
+                        'negative_marks': negative_marks
                     }
                 }
             )

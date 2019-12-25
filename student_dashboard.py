@@ -47,14 +47,16 @@ class StudentDashboard(Resource):
                         'subject': 1,
                         'ia': 1,
                         'semester': 1,
-                        'questions': 1
+                        'questions': 1,
+                        'positive_marks': 1,
+                        'negative_marks': 1,
+                        'gate': 1
                     },
                     'student_response': 1,
                     'score': 1,
                     'item_password': 1
                 }
             }
-
         ])
         )
 
@@ -66,8 +68,11 @@ class StudentDashboard(Resource):
                 'ia': response['lookup'][0]['ia'],
                 'semester': response['lookup'][0]['semester'],
                 'questions': response['lookup'][0]['questions'],
+                'positive_marks': response['lookup'][0]['positive_marks'],
+                'negative_marks': response['lookup'][0]['negative_marks'],
                 'student_response': response['student_response'],
-                'score': response['score']
+                'score': response['score'],
+                'gate': response['lookup'][0]['gate']
             })
 
         if len(response_given_list)>0:
