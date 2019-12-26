@@ -46,11 +46,16 @@ class NewQuestionBank(Resource):
         qbs = qb_list.get()
 
         print(name, qbs)
-        if name in qbs['qb_names']:
-            return {
-                'status': 'failed',
-                'error': 'qb_name_repeat_error'
-            }
+        arr = qbs['qb_names']
+        exist = False
+        for x in arr:
+            if x['name'] == name:
+                return {
+                    'status': 'failed',
+                    'error': 'qb_name_repeat_error'
+                }
+
+
 
         mongo_obj = mongo.db.qbanks.insert({
             "name": name,
