@@ -43,9 +43,29 @@ class FacultyContributeQB(Resource):
             }
     
 
+class GetQBQuestions(Resource):
+    def post(self):
+        obj = request.get_json(force=True)
+
+        qb_name = obj['qb_name']
+
+        mongo_obj = list(mongo.db.qbanks.find({
+            "name": qb_name
+        }))
+
+        print(mongo_obj)
+        return {
+            'status': 'success',
+            'description': mongo_obj[0]['description'],
+            'questions': mongo_obj[0]['questions']
+        }
+
+
+
 
 # resources routing
 api.add_resource(FacultyContributeQB, '/insert_update_qb')  
+api.add_resource(GetQBQuestions, '/get_qb_questions')  
 
 
 # ipaddress loaded dynamically
