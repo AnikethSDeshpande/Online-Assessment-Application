@@ -59,7 +59,8 @@ class NewQuestionBank(Resource):
 
         mongo_obj = mongo.db.qbanks.insert({
             "name": name,
-            "description": str(description)
+            "description": str(description),
+            "questions": []
         })
         
         new_list = qb_list.get()

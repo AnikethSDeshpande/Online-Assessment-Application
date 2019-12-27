@@ -53,7 +53,6 @@ class GetQBQuestions(Resource):
             "name": qb_name
         }))
 
-        print(mongo_obj)
         return {
             'status': 'success',
             'description': mongo_obj[0]['description'],
