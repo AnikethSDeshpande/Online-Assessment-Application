@@ -76,9 +76,14 @@ class NewQuestionBank(Resource):
             'error': 'one or more fields empty'
         }
 
+
+
+
+
 # resources routing
 api.add_resource(QuestionBankList, '/question_bank_list')  
 api.add_resource(NewQuestionBank, '/new_qb')  
+
 
 
 

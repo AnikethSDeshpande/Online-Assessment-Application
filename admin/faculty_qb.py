@@ -41,6 +41,11 @@ class FacultyContributeQB(Resource):
             return {
                 'status': 'success'
             }
+        
+        return {
+            'status': 'failed',
+            'error': 'QB_NOT_MODIFIED'
+        }
     
 
 class GetQBQuestions(Resource):
@@ -60,12 +65,31 @@ class GetQBQuestions(Resource):
         }
 
 
+class GenerateQuestionPaper(Resource):
+    def post(self):
+        obj = request.get_json(force = True)
+
+        qb_name = obj['qb_name']
+        
+        qb = list(
+            mongo.db.qbanks.find(
+                {
+                    "name": qb_name
+                }
+            )
+        )
+
+        print(qb[0])
+
+        return {
+            "qb": 'dsa'
+        }
 
 
 # resources routing
 api.add_resource(FacultyContributeQB, '/insert_update_qb')  
 api.add_resource(GetQBQuestions, '/get_qb_questions')  
-
+api.add_resource(GenerateQuestionPaper, '/generate_question_paper')  
 
 # ipaddress loaded dynamically
 if __name__ == '__main__':
