@@ -113,6 +113,39 @@ class GenerateQuestionPaper(Resource):
             }
 
 
+class FinalizeQuestionPaper(Resource):
+    def post(self):
+        obj = request.get_json(force=True)
+
+        item_password = obj['item_password']
+
+        def checkAvailability(password):
+            mongo_obj = list(mongo.db.items.find({'item_password': password}))
+            if len(mongo_obj)>0:
+                return False
+            else:
+                return True
+        
+        if checkAvailability(item_password):
+            result = mongo.db.items.insert(obj)
+            
+            if result:
+                return {
+                    "status": "success"
+                    #"id": str(sha1(str(result).encode()))
+                }
+            else:
+                return {
+                    "status": "failed",
+                    "error": "DBError"
+                }
+        
+        else:
+            return {
+                'status': 'failed',
+                'error': 'exam_key not unique' 
+            }
+
 
 # resources routing
 api.add_resource(FacultyContributeQB, '/insert_update_qb')  
