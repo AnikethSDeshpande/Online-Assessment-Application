@@ -8,6 +8,8 @@ from flask_restful import Resource, Api
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 from config import get_ip
+from itertools import combinations
+import random
 
 ip_address = get_ip()
 
@@ -70,7 +72,9 @@ class GenerateQuestionPaper(Resource):
         obj = request.get_json(force = True)
 
         qb_name = obj['qb_name']
-        
+        qb_levels = obj['levels']
+        no_of_questions = obj['no_of_questions']
+
         qb = list(
             mongo.db.qbanks.find(
                 {
@@ -79,11 +83,35 @@ class GenerateQuestionPaper(Resource):
             )
         )
 
-        print(qb[0])
+        questions = qb[0]['questions']
 
-        return {
-            "qb": 'dsa'
-        }
+        level_match_questions = []
+
+        for question in questions:
+            if question['level'] in qb_levels:
+                level_match_questions.append(question)
+        
+        if len(level_match_questions) >= no_of_questions:
+            generated_questions = random.choices(level_match_questions, k=no_of_questions)
+
+            return {
+                'status': 'success',
+                'generated_questions': generated_questions,
+                'note': ['sufficient_questions', no_of_questions, len(generated_questions)]
+            }
+            # array of note: 
+            # note[0] --> sufficient/insufficient
+            # note[1] --> number of asked questions
+            # note[2] --> number of provided questions
+        else:
+            generated_questions = level_match_questions
+
+            return {
+                'status': 'success',
+                'generated_questions': generated_questions,
+                'note': ['insufficient_questions', no_of_questions, len(generated_questions)]
+            }
+
 
 
 # resources routing

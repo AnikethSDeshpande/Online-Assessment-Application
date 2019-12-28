@@ -28,7 +28,8 @@ class QuestionBankList(Resource):
         for qb_name in mongo_obj:
             qb_names.append({
                 "name": qb_name['name'],
-                "description": qb_name['description']
+                "description": qb_name['description'],
+                'no_of_questions': len(qb_name['questions'])
             })
 
         return {"qb_names": qb_names}
