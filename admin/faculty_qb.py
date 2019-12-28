@@ -151,6 +151,7 @@ class FinalizeQuestionPaper(Resource):
 api.add_resource(FacultyContributeQB, '/insert_update_qb')  
 api.add_resource(GetQBQuestions, '/get_qb_questions')  
 api.add_resource(GenerateQuestionPaper, '/generate_question_paper')  
+api.add_resource(FinalizeQuestionPaper, '/finalize_question_paper')
 
 # ipaddress loaded dynamically
 if __name__ == '__main__':
