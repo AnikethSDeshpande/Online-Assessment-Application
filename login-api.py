@@ -69,7 +69,7 @@ class Login(Resource):
         if len(mongo_obj)==1:
             return True, mongo_obj[0]['username'], mongo_obj[0]['type']
         else:
-            return False, ''
+            return False, '', ''
 
     # genToken: generates a token that will be used throughout the login seesion
     def genToken(self, username):
